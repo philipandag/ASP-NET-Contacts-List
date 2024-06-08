@@ -7,4 +7,8 @@
     <RootNamespace>ASP_NET_Contacts_List</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
 </Project>
