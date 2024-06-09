@@ -4,5 +4,17 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <form id="login" runat="server" method="post">
+		<div class="form-group">
+            <label for="email">E-mail:</label>
+            <input type="text" id="email" name="email" class="form-control" />
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" class="form-control" />
+		</div>
+		<button type="submit" class="btn btn-primary">Login</button>
+	</form>
+
+
+
 </div>

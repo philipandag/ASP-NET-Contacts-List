@@ -1,35 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace ASP_NET_Contacts_List.Models
 {
-    public class Contact
+    public class Contact : IdentityUser<int>
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // auto increment key
-        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+
+        public override string PasswordHash { get; set; } = string.Empty;
+        public string Surname { get; set; } = string.Empty;
 
         [AllowNull]
-        public string Name { get; set; }
-
-        [Required]
-        public string Email { get; set; }
-
-        [Required]
-        public string Password { get; set; }
+        public ContactCategory? MainCategory { get; set; }
 
         [AllowNull]
-        public string Category { get; set; }
-
-        [AllowNull]
-        public string SubCategory { get; set; }
-
-        [AllowNull]
-        public string PhoneNumber { get; set; }
+        public ContactSubCategory? SubCategory { get; set; }
 
         [AllowNull]
         [DataType(DataType.Date)]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
     }
 }

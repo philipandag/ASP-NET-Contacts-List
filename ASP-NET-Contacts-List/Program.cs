@@ -1,6 +1,13 @@
 using ASP_NET_Contacts_List.Data;
+using ASP_NET_Contacts_List.Models;
+using ASP_NET_Contacts_List.Models.DTO;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
 
 namespace ASP_NET_Contacts_List
 {
@@ -9,12 +16,6 @@ namespace ASP_NET_Contacts_List
         public static void Main(string[] args)
         {
 
-            // configuring serilog logger to log to a file
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.File("logs/ContactsLogs.txt", rollingInterval: RollingInterval.Day)
-                .CreateLogger();
-
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -22,47 +23,64 @@ namespace ASP_NET_Contacts_List
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
             });
 
-
-            builder.Host.UseSerilog();
-
             // Add services to the container.
-            builder.Services.AddControllersWithViews().AddNewtonsoftJson();
-          
+            builder.Services.AddControllersWithViews();
             builder.Services.AddEndpointsApiExplorer();
+
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("UsersOnly", policy =>
+                {
+                    policy.RequireRole("User");
+                });
+            });
+
+            //add cookie authentication and authorization services
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie();
+
+            builder.Services.AddAuthorization();
+
+
+
+
+            // pipeline
             var app = builder.Build();
+
+
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
-            if(app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
+                app.UseDeveloperExceptionPage();
                 app.UseSwaggerUI(c =>
                 {
                     c.RoutePrefix = string.Empty;
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Name of Your API v1");
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ContactsAPI v1");
                 });
             }
 
-
-
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
 
             app.Run();
         }
