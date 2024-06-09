@@ -58,16 +58,16 @@ namespace ASP_NET_Contacts_List
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseDeveloperExceptionPage();
-                app.UseSwaggerUI(c =>
-                {
-                    c.RoutePrefix = string.Empty;
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ContactsAPI v1");
-                });
-            }
+            //if (app.Environment.IsDevelopment())
+            //{
+            //    app.UseSwagger();
+            //    app.UseDeveloperExceptionPage();
+            //    app.UseSwaggerUI(c =>
+            //    {
+            //        c.RoutePrefix = string.Empty;
+            //        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ContactsAPI v1");
+            //    });
+            //}
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

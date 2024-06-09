@@ -1,20 +1,31 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+
 }
+    <section id="login">
+        <form id="login" runat="server">
+            <div class="form-group">
+                <label for="email">E-mail:</label>
+                <input type="text" id="email" name="email" class="form-control" />
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <form id="login" runat="server" method="post">
-		<div class="form-group">
-            <label for="email">E-mail:</label>
-            <input type="text" id="email" name="email" class="form-control" />
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary" onclick="Login()">Login</button>
+        </form>
+    </section>
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" class="form-control" />
-		</div>
-		<button type="submit" class="btn btn-primary">Login</button>
-	</form>
+    <hr/>
 
+    <section id="Contacts">
+        <div class="ContactsList">
+			<div>Name</div>
+            <div>Surname</div>
+            <div>Category</div>
+            <div>Subcategory</div>
+            <div>Options</div>
+        </div>
+        <ul class="ContactsList" id="ContactsList">
+        </ul>
+    </section>
 
-
-</div>

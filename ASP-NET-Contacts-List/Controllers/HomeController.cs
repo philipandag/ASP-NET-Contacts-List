@@ -7,6 +7,7 @@ namespace ASP_NET_Contacts_List.Controllers
 {
     public class HomeController : Controller
     {
+        [Route("index.html")]
         public IActionResult Index()
         {
             return View();

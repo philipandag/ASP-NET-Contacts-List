@@ -18,5 +18,60 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+form#login {
+    width: 50%;
+    margin: 0 auto;
+}
+
+button.Contact-Options-Button {
+
+}
+
+#Contacts {
+    margin: 0 auto;
+    width: 90%;
+    height: fit-content;
+    max-height: 40vh;
+}
+
+div.ContactsList {
+    display: grid;
+    grid-auto-flow: column;
+    width: 90%;
+    margin: 0 auto;
+    height: 100%;
+    padding: 0;
+}
+
+ul.ContactsList {
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+li.Contact-Item {
+    display: grid;
+    grid-auto-flow: column;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+}
+
+li div.Contact-Item-Info {
+    display: grid;
+    grid-auto-flow: column;
+
+}
+
+article {
+    height: 100%;
 }
