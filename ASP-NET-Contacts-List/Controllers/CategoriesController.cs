@@ -40,7 +40,7 @@ namespace ASP_NET_Contacts_List.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<ContactCategoryDTO> GetCategories(int id)
+        public ActionResult<ContactCategoryDTO> GetCategory(int id)
         {
             if (id < 1) // ids start from 1
             {
@@ -115,7 +115,7 @@ namespace ASP_NET_Contacts_List.Controllers
             _database.ContactCategories.Add(model);
             _database.SaveChanges(); // commit database transaction
 
-            return CreatedAtAction(nameof(GetCategories), new { id = categoryDTO.Id }, categoryDTO);
+            return CreatedAtAction(nameof(CreateCategory), new { id = categoryDTO.Id }, categoryDTO);
         }
 
         [HttpDelete("{id:int}")]

@@ -246,6 +246,7 @@ namespace ASP_NET_Contacts_List.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [Authorize]
         public IActionResult UpdateContact(int id, [FromBody] ContactDTO contactDTO)
         {
@@ -307,6 +308,13 @@ namespace ASP_NET_Contacts_List.Controllers
                 return BadRequest(ModelState);
             }
 
+            var checkemail = _database.Contacts.FirstOrDefault(u => u.Email.ToLower() == contactDTO.Email.ToLower());
+            if (checkemail != null && checkemail.Id != contactDTO.Id)
+            {
+                ModelState.AddModelError("Error", "Contact with this email already exists");
+                return Conflict(ModelState);
+            }
+
             // update contact details
             contact.Name = contactDTO.Name;
             contact.Surname = contactDTO.Surname;
@@ -316,6 +324,8 @@ namespace ASP_NET_Contacts_List.Controllers
             contact.Subcategory = subcategory;
             contact.PhoneNumber = contactDTO.PhoneNumber;
             contact.DateOfBirth = contactDTO.DateOfBirth;
+
+
 
 
             _database.Contacts.Update(contact);

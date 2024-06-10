@@ -11,11 +11,11 @@
             <label for="login-password">Password:</label>
             <input type="password" id="login-password" name="login-password" class="form-control" />
         </div>
-        <button type="submit" class="btn btn-primary" onclick="Login()">Login</button>
+        <button type="submit" class="btn btn-primary" onclick="login()">Login</button>
     </form>
 
     <h2 class="LoggedInOnly hidden Appearing">Welcome, <span id="logged-in-username"></span></h2>
-    <button type="button" class="btn btn-primary LoggedInOnly hidden Appearing" onclick="Logout()">Logout</button>
+    <button type="button" class="btn btn-primary LoggedInOnly hidden Appearing" onclick="logout()">Logout</button>
     <h2 id="result-message"></h2>
     </section>
 
@@ -46,7 +46,7 @@
                 <input type="password" id="create-contact-password" name="create-contact-password" class="form-control" />
 
                 <label for="create-contact-category">Category</label>
-                <select id="create-contact-category" name="create-contact-category" class="form-control" onchange="UpdateSubcategoriesList()">
+                <select id="create-contact-category" name="create-contact-category" class="form-control" onchange="updateSubcategoriesList()">
                 </select>
 
                 <label for="create-contact-subcategory" id="create-contact-subcategory-label" class="Appearing visible">Subcategory</label>
@@ -63,9 +63,9 @@
                 <input type="date" id="create-contact-dateofbirth" name="create-contact-dateofbirth" class="form-control" />
 
             </div>
-            <button type="submit" class="btn btn-primary" onclick="CreateContact()">Create</button>
+            <button type="submit" class="btn btn-primary" onclick="createContact()">Create</button>
         </form>
-    <button type="button" id="show-create-contact-form-button"class="btn btn-primary LoggedInOnly hidden Appearing" onclick="ToggleShowCreateContact()">+</button>
-    <button type="button" id="reload-contact-list-button" class="btn btn-primary" onclick="ReloadContacts()">Refresh List</button>
+    <button type="button" id="show-create-contact-form-button"class="btn btn-primary LoggedInOnly hidden Appearing" onclick="toggleShowCreateContact()">+</button>
+    <button type="button" id="reload-contact-list-button" class="btn btn-primary" onclick="reloadContacts()">Refresh List</button>
     </section>
 

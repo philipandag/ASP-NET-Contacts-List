@@ -11,7 +11,7 @@ var loggedIn = false;
 var loggedInUser;
 var siteurl = "https://localhost:7020";
 // Tries to log in with the credentials from the form and handles the response
-function Login() {
+function login() {
     // Get the email and password from the form
     let email = document.getElementById("login-email").value;
     let password = document.getElementById("login-password").value;
@@ -29,6 +29,7 @@ function Login() {
             return data.json();
         }
         else if (data.status == 401) {
+            console.log("Login error", data);
             showMessage("Wrong credentials");
             throw new Error("Wrong credentials");
         }
@@ -44,7 +45,7 @@ function Login() {
     });
 }
 // Tries to log out and handles the response
-function Logout() {
+function logout() {
     // Send the logout request and handle the response
     var result = fetch(siteurl + "/api/Contacts/logout", {
         method: 'POST',
@@ -58,11 +59,11 @@ function Logout() {
         else {
             showMessage("Logout failed");
             console.error("Logout failed:", data);
+            throw new Error("Logout failed");
         }
     })
         .catch((error) => {
         console.error('Logout Error:', error);
-        onLogout();
     });
 }
 // Gets all contacts from the server
@@ -70,6 +71,11 @@ function getContacts() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Getting contacts");
         const response = yield fetch(siteurl + "/api/Contacts");
+        if (response.status != 200) {
+            console.error("Error getting contacts", response);
+            showMessage("Error getting contacts");
+            return [];
+        }
         const data = yield response.json();
         return data;
     });
@@ -108,7 +114,7 @@ function onLogout() {
     });
 }
 // Reloads the contents of the contacts list
-function ReloadContacts() {
+function reloadContacts() {
     console.log("Loading contacts");
     var list = document.getElementById("ContactsList");
     list.innerHTML = "";
@@ -147,7 +153,7 @@ function ReloadContacts() {
             }
             // button for showing the actions that can be done with the contact
             optionsButton.innerHTML = "...";
-            optionsButton.onclick = () => ToggleShowContactOptions(contact.id);
+            optionsButton.onclick = () => toggleShowContactOptions(contact.id);
             datasection.appendChild(optionsButton);
             // field for elements used to interact with the contact
             var optionsField = document.createElement("div");
@@ -161,7 +167,7 @@ function ReloadContacts() {
     showMessage("Contacts reloaded");
 }
 // Shows or hides the options menu for a contact entry in contact list
-function ToggleShowContactOptions(contactId) {
+function toggleShowContactOptions(contactId) {
     console.log("Options for contact " + contactId);
     var options = document.getElementById("Contact-Options-Field-" + contactId);
     options.innerHTML = "";
@@ -173,11 +179,11 @@ function ToggleShowContactOptions(contactId) {
         showElement(options);
         var editButton = document.createElement("button");
         editButton.classList.add("btn", "btn-primary");
-        editButton.onclick = () => EditContact(contactId);
+        editButton.onclick = () => editContact(contactId);
         editButton.innerText = "Edit";
         options.appendChild(editButton);
         var deleteButton = document.createElement("button");
-        deleteButton.onclick = () => DeleteContact(contactId);
+        deleteButton.onclick = () => deleteContact(contactId);
         deleteButton.classList.add("btn", "btn-danger");
         deleteButton.innerText = "Delete";
         options.appendChild(deleteButton);
@@ -185,20 +191,25 @@ function ToggleShowContactOptions(contactId) {
     }
 }
 // Gets a contact from the server by id
-function GetContact(contactId) {
+function getContact(contactId) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Getting contact" + contactId);
         const response = yield fetch(siteurl + "/api/Contacts/" + contactId);
+        if (response.status != 200) {
+            console.error("Error getting contact", response);
+            showMessage("Error getting contact " + contactId);
+            return null;
+        }
         const data = yield response.json();
         return data;
     });
 }
 // Create form for editing a contact in contact list entry of given id
-function EditContact(contactId) {
+function editContact(contactId) {
     console.log("Editing contact " + contactId);
     var options = document.getElementById("Contact-Options-Field-" + contactId);
     // First get the contact details from the server to be able to modify them
-    GetContact(contactId).then(contact => {
+    getContact(contactId).then(contact => {
         // Creating the form for editing the contact
         options.innerHTML = "";
         var form = document.createElement("form");
@@ -256,7 +267,7 @@ function EditContact(contactId) {
         mainCategoryInput.id = "MainCategoryInput";
         form.appendChild(mainCategoryInput);
         // Get possible main categories
-        GetCategoriesList().then(categories => {
+        getCategoriesList().then(categories => {
             categories.forEach(category => {
                 var option = document.createElement("option");
                 option.value = JSON.stringify(category);
@@ -276,7 +287,7 @@ function EditContact(contactId) {
         subcategoryInput.id = "SubcategoryInput";
         // Get possible subcategories for the main category
         var updateSubdirectories = () => {
-            GetSubcategoriesList(contact.mainCategory.id).then(subcategories => {
+            getSubcategoriesList(contact.mainCategory.id).then(subcategories => {
                 subcategories.forEach(subcategory => {
                     var option = document.createElement("option");
                     option.value = JSON.stringify(subcategory);
@@ -340,9 +351,32 @@ function EditContact(contactId) {
                 },
                 body: JSON.stringify(updatedContact)
             }).then((data) => {
-                console.log(data);
-                ReloadContacts();
-                showMessage("Contact updated successfully");
+                if (data.status == 204) {
+                    console.log("updated contact", data);
+                    reloadContacts();
+                    showMessage("Contact updated successfully");
+                }
+                else if (data.status == 400) {
+                    console.error("Error updating contact", data);
+                    showMessage("Error updating contact. Check the inputs.");
+                    throw new Error("Error updating contact");
+                }
+                else if (data.status == 401) {
+                    console.error("Unauthorized to update contact", data);
+                    showMessage("You are not authorized to update this contact");
+                    throw new Error("Error updating contact");
+                }
+                else if (data.status == 409) {
+                    showMessage("Failed to update contact. Contact with this email already exists.");
+                    console.error("Error updating contact", data);
+                    throw new Error("Error updating contact");
+                }
+                else {
+                    console.error("Error updating contact", data);
+                    showMessage("Error updating contact.");
+                    throw new Error("Error updating contact");
+                }
+            }).catch((error) => {
             });
         };
         options.appendChild(saveButton);
@@ -358,7 +392,7 @@ function EditContact(contactId) {
     });
 }
 // Creates a form for deleting selected contact
-function DeleteContact(contactId) {
+function deleteContact(contactId) {
     console.log("Deleting contact number" + contactId);
     var options = document.getElementById("Contact-Options-Field-" + contactId);
     options.innerHTML = "";
@@ -373,9 +407,22 @@ function DeleteContact(contactId) {
         fetch("https://localhost:7020/api/Contacts/" + contactId, {
             method: "DELETE"
         }).then((data) => {
-            console.log("Deleted", data);
-            ReloadContacts();
-            showMessage("Contact deleted successfully");
+            if (data.status == 204) {
+                console.log("Deleted", data);
+                reloadContacts();
+                showMessage("Contact deleted successfully");
+            }
+            else if (data.status == 404) {
+                console.error("Contact not found", data);
+                showMessage("Contact not found");
+                throw new Error("Error deleting contact");
+            }
+            else {
+                console.error("Error", data);
+                showMessage("Error deleting contact");
+                throw new Error("Error deleting contact");
+            }
+        }).catch((error) => {
         });
     };
     var nobutton = document.createElement("button");
@@ -390,14 +437,14 @@ function DeleteContact(contactId) {
     form.appendChild(yesbutton);
     options.appendChild(form);
 }
-// Hides the options for the selected contact
-function HideContactOptions(contactId) {
-    console.log("Hiding options for contact " + contactId);
-    var item = document.getElementById("Contact-Options-Field-" + contactId);
-    item.innerHTML = "";
-}
+//// Hides the options for the selected contact
+//function HideContactOptions(contactId: number) {
+//    console.log("Hiding options for contact " + contactId)
+//    var item = document.getElementById("Contact-Options-Field-" + contactId);
+//    item.innerHTML = "";
+//}
 // Shows or hides the create contact form
-function ToggleShowCreateContact() {
+function toggleShowCreateContact() {
     var createContactForm = document.getElementById("create-contact-form");
     if (elementVisible(createContactForm)) {
         hideElement(createContactForm);
@@ -406,11 +453,11 @@ function ToggleShowCreateContact() {
     else {
         showElement(createContactForm);
         document.getElementById("show-create-contact-form-button").innerHTML = "-";
-        UpdateCategoriesList();
+        updateCategoriesList();
     }
 }
 // adds a contact to the database using the data from the create contact form
-function CreateContact() {
+function createContact() {
     console.log("Adding contact");
     var name = document.getElementById("create-contact-name").value;
     var surname = document.getElementById("create-contact-surname").value;
@@ -438,31 +485,62 @@ function CreateContact() {
         },
         body: data
     })
-        .then(data => data.json())
+        .then(data => {
+        if (data.status == 201) {
+            return data.json();
+        }
+        if (data.status == 400) {
+            showMessage("Failed to add contact. Please check the data you entered.");
+            console.error("Error adding contact", data);
+            throw new Error("Error adding contact");
+        }
+        else if (data.status == 500) {
+            showMessage("Failed to add contact. Please try again later.");
+            console.error("Error adding contact", data);
+            throw new Error("Error adding contact");
+        }
+        else if (data.status == 401) {
+            showMessage("Failed to add contact. Please log in.");
+            console.error("Error adding contact", data);
+            throw new Error("Error adding contact");
+        }
+        else if (data.status == 409) {
+            showMessage("Failed to add contact. Contact with this email already exists.");
+            console.error("Error adding contact", data);
+            throw new Error("Error adding contact");
+        }
+        else {
+            showMessage("Failed to add contact.");
+            console.error("Error adding contact", data);
+            throw new Error("Error adding contact");
+        }
+    })
         .then(data => {
         console.log('Create Contact Success:', data);
+        reloadContacts();
+        showMessage("Contact added successfully");
         document.getElementById("result-message").innerHTML = "Contact added successfully";
-        ToggleShowCreateContact();
+        toggleShowCreateContact();
     })
         .catch((error) => {
-        console.error('Create Contact Error:', error);
-        document.getElementById("result-message").innerHTML = "Failed to add Contact";
-        ToggleShowCreateContact();
+        toggleShowCreateContact();
     });
-    ReloadContacts();
-    showMessage("Contact added successfully");
 }
 // returns a list of all the categories
-function GetCategoriesList() {
+function getCategoriesList() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Getting contacts");
         const response = yield fetch("https://localhost:7020/api/Categories");
+        if (response.status != 200) {
+            console.error("Error getting categories list", response);
+            return [];
+        }
         const data = yield response.json();
         return data;
     });
 }
 // updates the list of categories in the create contact form
-function UpdateCategoriesList() {
+function updateCategoriesList() {
     var categorySelect = document.getElementById("create-contact-category");
     categorySelect.innerHTML = "";
     var defaultoption = document.createElement("option");
@@ -470,7 +548,7 @@ function UpdateCategoriesList() {
     defaultoption.disabled = true;
     defaultoption.innerHTML = "";
     categorySelect.appendChild(defaultoption);
-    GetCategoriesList().then(categories => {
+    getCategoriesList().then(categories => {
         categories.forEach(category => {
             var option = document.createElement("option");
             option.value = JSON.stringify(category);
@@ -478,19 +556,23 @@ function UpdateCategoriesList() {
             categorySelect.appendChild(option);
         });
     });
-    UpdateSubcategoriesList();
+    updateSubcategoriesList();
 }
 // returns a list of all the subcategories of a category
-function GetSubcategoriesList(categoryId) {
+function getSubcategoriesList(categoryId) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("Getting contacts");
         const response = yield fetch("https://localhost:7020/api/Categories/" + categoryId + "/Subcategories");
+        if (response.status != 200) {
+            console.error("Error getting subcategories list", response);
+            return null;
+        }
         const data = yield response.json();
         return data;
     });
 }
 // updates the list of subcategories in the create contact form
-function UpdateSubcategoriesList() {
+function updateSubcategoriesList() {
     var category = document.getElementById("create-contact-category");
     if (category.value == "")
         return;
@@ -514,7 +596,7 @@ function UpdateSubcategoriesList() {
     defaultoption.disabled = true;
     defaultoption.innerHTML = "";
     subcategorySelect.appendChild(defaultoption);
-    GetSubcategoriesList(selectedCategory.id).then(subcategories => {
+    getSubcategoriesList(selectedCategory.id).then(subcategories => {
         subcategories.forEach(category => {
             var option = document.createElement("option");
             option.value = JSON.stringify(category);
@@ -545,5 +627,5 @@ function elementVisible(element) {
 function showMessage(message) {
     document.getElementById("result-message").innerHTML = message;
 }
-window.onload = ReloadContacts;
+window.onload = reloadContacts;
 //# sourceMappingURL=app.js.map
