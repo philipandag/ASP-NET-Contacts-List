@@ -16,6 +16,7 @@ namespace ASP_NET_Contacts_List
     {
         public static void Main(string[] args)
         {
+            const bool SWAGGER = false;
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +31,8 @@ namespace ASP_NET_Contacts_List
             builder.Services.AddControllersWithViews();
             builder.Services.AddEndpointsApiExplorer();
 
-            builder.Services.AddSwaggerGen();
+            if(SWAGGER)
+                builder.Services.AddSwaggerGen();
 
             builder.Services.AddAuthorization(options =>
             {
@@ -62,13 +64,16 @@ namespace ASP_NET_Contacts_List
 
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseDeveloperExceptionPage();
-                app.UseSwaggerUI(c =>
+                if (SWAGGER)
                 {
-                    c.RoutePrefix = string.Empty;
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ContactsAPI v1");
-                });
+                    app.UseSwagger();
+                    app.UseDeveloperExceptionPage();
+                    app.UseSwaggerUI(c =>
+                    {
+                        c.RoutePrefix = string.Empty;
+                        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ContactsAPI v1");
+                    });
+                }
             }
 
             app.UseHttpsRedirection();
