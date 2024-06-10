@@ -4,5 +4,6 @@
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public int SubcategoryForId { get; set; }
     }
 }

@@ -34,7 +34,7 @@ namespace ASP_NET_Contacts_List.Controllers
                 Email = x.Email,
                 DateOfBirth = x.DateOfBirth,
                 MainCategory = x.MainCategory != null ? (new ContactCategoryDTO { Id = x.MainCategory.Id, Name = x.MainCategory.Name}) : null,
-                SubCategory = x.SubCategory != null ? (new ContactSubcategoryDTO { Id = x.SubCategory.Id, Name = x.SubCategory.Name}) : null
+                Subcategory = x.Subcategory != null ? (new ContactSubcategoryDTO { Id = x.Subcategory.Id, Name = x.Subcategory.Name}) : null
             });
             return Ok(contacts);
         }
@@ -45,7 +45,7 @@ namespace ASP_NET_Contacts_List.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> Login([FromBody] ContactLoginCredentialsDTO contactLoginCredentialsDTO)
         {
-            var contact = _database.Contacts.FirstOrDefault(x => x.Email == contactLoginCredentialsDTO.Email);
+            var contact = _database.Contacts.Include(c=>c.MainCategory).Include(c=>c.Subcategory).FirstOrDefault(x => x.Email == contactLoginCredentialsDTO.Email);
             if (contact == null)
             {
                 return Unauthorized();
@@ -66,7 +66,18 @@ namespace ASP_NET_Contacts_List.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme))
             );
 
-            return Ok();
+            var user = new ContactDTO
+            {
+                Id = contact.Id,
+                Name = contact.Name,
+                Surname = contact.Surname,
+                Email = contact.Email,
+                DateOfBirth = contact.DateOfBirth,
+                MainCategory = contact.MainCategory != null ? (new ContactCategoryDTO { Id = contact.MainCategory.Id, Name = contact.MainCategory.Name }) : null,
+                Subcategory = contact.Subcategory != null ? (new ContactSubcategoryDTO { Id = contact.Subcategory.Id, Name = contact.Subcategory.Name }) : null
+            };
+
+            return Ok(user);
         }
 
         [HttpPost("logout")]
@@ -83,19 +94,45 @@ namespace ASP_NET_Contacts_List.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<ContactLoginCredentialsDTO> GetContact(int id)
+        public ActionResult<ContactDTO> GetContact(int id)
         {
             if (id < 1) // ids start from 1
             {
                 return BadRequest();
             }
-            var contact = _database.Contacts.FirstOrDefault(x => x.Id == id);
+            var contact = _database.Contacts.Where(x => x.Id == id).Include(c=>c.MainCategory).Include(c=>c.Subcategory).Select(x => new ContactDTO
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Surname = x.Surname,
+                Email = x.Email,
+                DateOfBirth = x.DateOfBirth,
+                MainCategory = x.MainCategory != null ? (new ContactCategoryDTO { Id = x.MainCategory.Id, Name = x.MainCategory.Name }) : null,
+                Subcategory = x.Subcategory != null ? (new ContactSubcategoryDTO { Id = x.Subcategory.Id, Name = x.Subcategory.Name }) : null,
+                PhoneNumber = x.PhoneNumber
+
+            }).FirstOrDefault();
+            
             if (contact == null) // contact not found
             {
                 return NotFound();
             }
 
-            return Ok(contact);
+            // Create a new ContactDTO object with the data from the database
+            var contactDTO = new ContactDTO
+            {
+                Id = contact.Id,
+                Name = contact.Name,
+                Surname = contact.Surname,
+                Email = contact.Email,
+                Password = "",
+                MainCategory = contact.MainCategory != null ? (new ContactCategoryDTO { Id = contact.MainCategory.Id, Name = contact.MainCategory.Name }) : null,
+                Subcategory = contact.Subcategory != null ? (new ContactSubcategoryDTO { Id = contact.Subcategory.Id, Name = contact.Subcategory.Name }) : null,
+                PhoneNumber = contact.PhoneNumber,
+                DateOfBirth = contact.DateOfBirth,
+            };
+
+            return Ok(contactDTO);
         }
 
         [HttpPost]
@@ -125,6 +162,12 @@ namespace ASP_NET_Contacts_List.Controllers
             var hashed = passwordHasher.HashPassword(null, contactDTO.Password);
 
             //find categories and subcategories in database to make sure they exist
+            if(contactDTO.MainCategory == null || contactDTO.Subcategory == null)
+            {
+                ModelState.AddModelError("Error", "Category or Subcategory is missing");
+                return BadRequest(ModelState);
+            }
+
             var category = _database.ContactCategories.FirstOrDefault(c => c.Name == contactDTO.MainCategory.Name);
             if (category == null)
             {
@@ -132,26 +175,40 @@ namespace ASP_NET_Contacts_List.Controllers
                 return BadRequest(ModelState);
             }
 
-            var subCategory = _database.ContactSubCategories.FirstOrDefault(c => c.Name == contactDTO.SubCategory.Name);
+            var subCategory = _database.ContactSubcategories.FirstOrDefault(c => c.Name == contactDTO.Subcategory.Name);
+
             if (subCategory == null)
             {
-                ModelState.AddModelError("Error", "SubCategory does not exist");
-                return BadRequest(ModelState);
+                if (category.WildcardCategory == true)
+                {
+                    ContactSubcategory newsSubDirectory = new()
+                    {
+                        Name = contactDTO.Subcategory.Name,
+                        Id = 0,
+                        SubcategoryFor = category
+                    };
+                    _database.ContactSubcategories.Add(newsSubDirectory);
+                    _database.SaveChanges();
+                    subCategory = newsSubDirectory;
+                }
+                else
+                {
+                    ModelState.AddModelError("Error", "Subcategory does not exist");
+                    return BadRequest(ModelState);
+                }
             }
-
-
-
 
             Contact model = new()
             {
                 Id = contactDTO.Id,
                 Name = contactDTO.Name,
+                Surname = contactDTO.Surname,
                 Email = contactDTO.Email,
                 PasswordHash = hashed,
                 MainCategory = category,
-                SubCategory = subCategory,
+                Subcategory = subCategory,
                 PhoneNumber = contactDTO.PhoneNumber,
-                DateOfBirth = contactDTO.DateOfBirth
+                DateOfBirth = contactDTO.DateOfBirth,
             };
 
 
@@ -161,7 +218,7 @@ namespace ASP_NET_Contacts_List.Controllers
             return CreatedAtAction(nameof(GetContact), new { id = contactDTO.Id }, contactDTO);
         }
 
-        [HttpDelete("{id:int}", Name = "DeleteContact")]
+        [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -185,7 +242,7 @@ namespace ASP_NET_Contacts_List.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id:int}", Name = "UpdateContact")]
+        [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -195,50 +252,73 @@ namespace ASP_NET_Contacts_List.Controllers
             // check if the request is valid
             if (contactDTO == null || id != contactDTO.Id || contactDTO.Id < 1)
             {
+                ModelState.AddModelError("Error", "tried to change ID");
                 return BadRequest();
             }
 
-            // find the contact to update
-            var contact = _database.Contacts.AsNoTracking().FirstOrDefault(u => u.Id == contactDTO.Id);
+            // get the contact to update details
+            var contact = _database.Contacts.Where(u => u.Id == contactDTO.Id).Include(c => c.MainCategory).Include(c => c.Subcategory).FirstOrDefault();
             if (contact == null)
             {
                 return NotFound();
             }
 
-            // generate password hash from given password
-            var passwordHasher = new PasswordHasher<Contact>();
-            var hashed = passwordHasher.HashPassword(null, contactDTO.Password);
+            // generate password hash from given password or use the old one if password is not given
+            string hashed;
+            if (contactDTO.Password != "")
+            {
+                var passwordHasher = new PasswordHasher<Contact>();
+                hashed = passwordHasher.HashPassword(null, contactDTO.Password);
+            }
+            else
+            {
+                hashed = contact.PasswordHash;
+            }
 
-            // find categories and subcategories in database to make sure they exist
-            var category = _database.ContactCategories.FirstOrDefault(c => c.Name == contactDTO.MainCategory.Name);
+            // Find new category  in database or use the old one if it is not given
+            ContactCategory category;
+            if(contactDTO.MainCategory == null)
+            {
+                category = contact.MainCategory;
+            }
+            else
+            {
+                category = _database.ContactCategories.FirstOrDefault(c => c.Name == contactDTO.MainCategory.Name);
+            }
             if (category == null)
             {
                 ModelState.AddModelError("Error", "Category does not exist");
                 return BadRequest(ModelState);
             }
 
-            var subCategory = _database.ContactSubCategories.FirstOrDefault(c => c.Name == contactDTO.SubCategory.Name);
-            if (subCategory == null)
+            // Find new subcategory  in database or use the old one if it is not given
+            ContactSubcategory subcategory;
+            if(contactDTO.Subcategory == null)
             {
-                ModelState.AddModelError("Error", "SubCategory does not exist");
+                subcategory = contact.Subcategory;
+            }
+            else
+            {
+                subcategory = _database.ContactSubcategories.FirstOrDefault(c => c.Name == contactDTO.Subcategory.Name);
+            }
+            if (subcategory == null)
+            {
+                ModelState.AddModelError("Error", "Subcategory does not exist");
                 return BadRequest(ModelState);
             }
 
+            // update contact details
+            contact.Name = contactDTO.Name;
+            contact.Surname = contactDTO.Surname;
+            contact.Email = contactDTO.Email;
+            contact.PasswordHash = hashed;
+            contact.MainCategory = category;
+            contact.Subcategory = subcategory;
+            contact.PhoneNumber = contactDTO.PhoneNumber;
+            contact.DateOfBirth = contactDTO.DateOfBirth;
 
 
-            Contact model = new()
-            {
-                Id = contactDTO.Id,
-                Name = contactDTO.Name,
-                Email = contactDTO.Email,
-                PasswordHash = hashed,
-                MainCategory = category,
-                SubCategory = subCategory,
-                PhoneNumber = contactDTO.PhoneNumber,
-                DateOfBirth = contactDTO.DateOfBirth
-            };
-
-            _database.Contacts.Update(model);
+            _database.Contacts.Update(contact);
             _database.SaveChanges(); // commit database transaction
 
             return NoContent();

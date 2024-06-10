@@ -9,7 +9,7 @@ namespace ASP_NET_Contacts_List.Data
     {
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<ContactCategory> ContactCategories { get; set; }
-        public DbSet<ContactSubCategory> ContactSubCategories { get; set; }
+        public DbSet<ContactSubcategory> ContactSubcategories { get; set; }
 
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
@@ -34,15 +34,16 @@ namespace ASP_NET_Contacts_List.Data
                 new ContactCategory
                 {
                     Id = 3,
-                    Name = "Other"
+                    Name = "Other",
+                    WildcardCategory = true
                 },
             };
             modelBuilder.Entity<ContactCategory>().HasData(
                 categories
             );
 
-            modelBuilder.Entity<ContactSubCategory>().HasOne(subcategory => subcategory.SubcategoryFor).WithMany(category => category.SubCategories);
-            modelBuilder.Entity<ContactSubCategory>().HasData(
+            modelBuilder.Entity<ContactSubcategory>().HasOne(subcategory => subcategory.SubcategoryFor).WithMany(category => category.Subcategories);
+            modelBuilder.Entity<ContactSubcategory>().HasData(
                 new
                 {
                     Id = 1,
@@ -64,7 +65,7 @@ namespace ASP_NET_Contacts_List.Data
             );
 
             modelBuilder.Entity<Contact>().HasOne(contact => contact.MainCategory).WithMany(category => category.ContactsWithCategory);
-            modelBuilder.Entity<Contact>().HasOne(contact => contact.SubCategory).WithMany(subcategory => subcategory.ContactsWithSubcategory);
+            modelBuilder.Entity<Contact>().HasOne(contact => contact.Subcategory).WithMany(subcategory => subcategory.ContactsWithSubcategory);
             modelBuilder.Entity<Contact>().HasData(
                 new
                 {
@@ -75,7 +76,7 @@ namespace ASP_NET_Contacts_List.Data
                     PasswordHash = new PasswordHasher<Contact>().HashPassword(null, "Haslo1"),     
                     PhoneNumber = "213465743",
                     MainCategoryId = 1,
-                    SubCategoryId = 1,
+                    SubcategoryId = 1,
                     DateOfBirth = new System.DateTime(1980, 1, 1),
 
                     AccessFailedCount = 0,
@@ -96,7 +97,27 @@ namespace ASP_NET_Contacts_List.Data
                     PasswordHash = new PasswordHasher<Contact>().HashPassword(null, "admin"),
                     PhoneNumber = "123456789",
                     MainCategoryId = 1,
-                    SubCategoryId = 1,
+                    SubcategoryId = 1,
+                    DateOfBirth = new System.DateTime(2024, 2, 28),
+                    AccessFailedCount = 0,
+                    EmailConfirmed = false,
+                    LockoutEnabled = false,
+                    PhoneNumberConfirmed = false,
+                    TwoFactorEnabled = false,
+                    SecurityStamp = "security_stamp2",
+                    ConcurrencyStamp = "concurrency_stamp2",
+                    NormalizedEmail = ""
+                },
+                new
+                {
+                    Id = 3,
+                    Name = "a",
+                    Surname = "a",
+                    Email = "a",
+                    PasswordHash = new PasswordHasher<Contact>().HashPassword(null, "a"),
+                    PhoneNumber = "123",
+                    MainCategoryId = 1,
+                    SubcategoryId = 1,
                     DateOfBirth = new System.DateTime(2024, 2, 28),
                     AccessFailedCount = 0,
                     EmailConfirmed = false,

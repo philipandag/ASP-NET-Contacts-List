@@ -19,6 +19,7 @@ html {
 
 body {
     margin-bottom: 60px;
+    height: fit-content;
 }
 
 html, body {
@@ -26,7 +27,11 @@ html, body {
     height: 100%;
 }
 
-form#login {
+.container {
+    height: fit-content;
+}
+
+form#login-form {
     width: 50%;
     margin: 0 auto;
 }
@@ -38,40 +43,97 @@ button.Contact-Options-Button {
 #Contacts {
     margin: 0 auto;
     width: 90%;
-    height: fit-content;
-    max-height: 40vh;
+    height: auto;
 }
 
 div.ContactsList {
-    display: grid;
-    grid-auto-flow: column;
+    display: flex;
+    flex-direction: row;
     width: 90%;
     margin: 0 auto;
-    height: 100%;
-    padding: 0;
+}
+div.ContactsList > div{
+    flex: 1;
 }
 
 ul.ContactsList {
     overflow: hidden;
     overflow-y: scroll;
+
+    width: 90%;
+    margin: 0 auto;
+    height: 100%;
+    padding: 10px;
+    max-height: 40vh;
+    align-items: stretch;
 }
 
-li.Contact-Item {
-    display: grid;
-    grid-auto-flow: column;
+.Contact-Item {
+    display: flex;
+    flex-direction: column;
     margin: 10px 0;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width: 100%;
+}
+.Contact-Data-Section {
+    display: flex;
+    flex-direction: row;
 }
 
-li div.Contact-Item-Info {
-    display: grid;
-    grid-auto-flow: column;
+.Contact-Options-Section{
 
 }
 
-article {
-    height: 100%;
+.Contact-Item-Data {
+    flex: 1;
 }
+
+.Appearing {
+    transition: visibility 0.5s, opacity 0.5s, max-height 0.5s ease-in-out;
+    overflow-y: hidden;
+}
+
+.LoggedInOnly{
+
+}
+.hidden {
+    visibility: hidden;
+    max-height: 0;
+    opacity: 0;
+    padding: 0;
+    margin: 0;
+    transition: visibility 0.5s, opacity 0.5s, max-height 0.5s ease-in-out;
+    overflow-y: hidden;
+}
+.visible {
+    visibility: visible;
+    max-height: 100%;
+    opacity: 1;
+    transition: visibility 0s, opacity 0.5s, max-height 0.5s ease-in-out;
+    overflow-y: hidden;
+}
+.LoggedOutOnly {
+
+}
+
+.edit-form {
+display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#login-form{
+    padding: 10px;
+}
+#login-form > button {
+    margin: 10px;
+}
+
+#create-contact-form{
+    padding: 10px 30%;
+}
+
+

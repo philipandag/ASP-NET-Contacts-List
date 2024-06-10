@@ -2,17 +2,21 @@
     ViewData["Title"] = "Home Page";
 
 }
-    <section id="login">
-        <form id="login" runat="server">
-            <div class="form-group">
-                <label for="email">E-mail:</label>
-                <input type="text" id="email" name="email" class="form-control" />
+    <section id="head">
+    <form id="login-form" runat="server" class="LoggedOutOnly visible Appearing">
+        <div class="form-group">
+            <label for="login-email">E-mail:</label>
+            <input type="text" id="login-email" name="login-email" class="form-control" />
 
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" class="form-control" />
-            </div>
-            <button type="submit" class="btn btn-primary" onclick="Login()">Login</button>
-        </form>
+            <label for="login-password">Password:</label>
+            <input type="password" id="login-password" name="login-password" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary" onclick="Login()">Login</button>
+    </form>
+
+    <h2 class="LoggedInOnly hidden Appearing">Welcome, <span id="logged-in-username"></span></h2>
+    <button type="button" class="btn btn-primary LoggedInOnly hidden Appearing" onclick="Logout()">Logout</button>
+    <h2 id="result-message"></h2>
     </section>
 
     <hr/>
@@ -23,9 +27,45 @@
             <div>Surname</div>
             <div>Category</div>
             <div>Subcategory</div>
-            <div>Options</div>
+            <div class="LoggedInOnly hidden">Options</div>
         </div>
         <ul class="ContactsList" id="ContactsList">
-        </ul>
+        </ul>     
+        <form id="create-contact-form" class="Appearing hidden" runat="server" >
+            <div class="form-group">
+                <label for="create-contact-name">Name</label>
+                <input type="text" id="create-contact-name" name="create-contact-name" class="form-control" />
+
+                <label for="create-contact-surname">Surname</label>
+                <input type="text" id="create-contact-surname" name="create-contact-surname" class="form-control" />
+
+                <label for="create-contact-email">Email</label>
+                <input type="text" id="create-contact-email" name="create-contact-email" class="form-control" />
+
+                <label for="create-contact-password">Password</label>
+                <input type="password" id="create-contact-password" name="create-contact-password" class="form-control" />
+
+                <label for="create-contact-category">Category</label>
+                <select id="create-contact-category" name="create-contact-category" class="form-control" onchange="UpdateSubcategoriesList()">
+                </select>
+
+                <label for="create-contact-subcategory" id="create-contact-subcategory-label" class="Appearing visible">Subcategory</label>
+                <select id="create-contact-subcategory" name="create-contact-subcategory" class="form-control Appearing visible">
+                </select>
+
+                <label id="create-custom-contact-subcategory-label" for="create-custom-contact-subcategory" class="hidden">Custom Subcategory</label>
+                <input type="text" id="create-custom-contact-subcategory" name="create-custom-contact-subcategory" class="form-control Appearing hidden" />
+
+                <label for="create-contact-phone">Phone</label>
+                <input type="text" id="create-contact-phone" name="create-contact-phone" class="form-control" />
+
+                <label for="create-contact-dateofbirth">Date of Birth</label>
+                <input type="date" id="create-contact-dateofbirth" name="create-contact-dateofbirth" class="form-control" />
+
+            </div>
+            <button type="submit" class="btn btn-primary" onclick="CreateContact()">Create</button>
+        </form>
+    <button type="button" id="show-create-contact-form-button"class="btn btn-primary LoggedInOnly hidden Appearing" onclick="ToggleShowCreateContact()">+</button>
+    <button type="button" id="reload-contact-list-button" class="btn btn-primary" onclick="ReloadContacts()">Refresh List</button>
     </section>
 

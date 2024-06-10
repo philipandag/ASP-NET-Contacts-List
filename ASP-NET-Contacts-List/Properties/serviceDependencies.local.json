@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "secretStore": "LocalSecretsFile",
+      "type": "mssql.local",
+      "connectionId": "ConnectionStrings:DefaultSQLConnection",
+      "dynamicId": null
+    },
+    "identityapp1": {
+      "type": "identityapp.default",
+      "dynamicId": null
+    }
+  }
+}

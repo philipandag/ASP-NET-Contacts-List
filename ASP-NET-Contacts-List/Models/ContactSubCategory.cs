@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace ASP_NET_Contacts_List.Models
 {
-    public class ContactSubCategory
+    public class ContactSubcategory
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Serilog;
 using System.Text;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Identity.Web;
 
 namespace ASP_NET_Contacts_List
 {
@@ -22,6 +23,8 @@ namespace ASP_NET_Contacts_List
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
             });
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -39,11 +42,11 @@ namespace ASP_NET_Contacts_List
 
             //add cookie authentication and authorization services
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie();
-
-            builder.Services.AddAuthorization();
-
-
+                .AddCookie(options =>
+                {
+                    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+                    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+                });
 
 
             // pipeline
@@ -51,23 +54,22 @@ namespace ASP_NET_Contacts_List
 
 
 
-
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-            //if (app.Environment.IsDevelopment())
-            //{
-            //    app.UseSwagger();
-            //    app.UseDeveloperExceptionPage();
-            //    app.UseSwaggerUI(c =>
-            //    {
-            //        c.RoutePrefix = string.Empty;
-            //        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ContactsAPI v1");
-            //    });
-            //}
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseDeveloperExceptionPage();
+                app.UseSwaggerUI(c =>
+                {
+                    c.RoutePrefix = string.Empty;
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ContactsAPI v1");
+                });
+            }
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
@@ -79,7 +81,6 @@ namespace ASP_NET_Contacts_List
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-
 
 
             app.Run();

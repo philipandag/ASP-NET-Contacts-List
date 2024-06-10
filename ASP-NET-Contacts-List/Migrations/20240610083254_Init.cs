@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASP_NET_Contacts_List.Migrations
 {
     /// <inheritdoc />
-    public partial class First : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,7 +34,8 @@ namespace ASP_NET_Contacts_List.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WildcardCategory = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -63,7 +64,7 @@ namespace ASP_NET_Contacts_List.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ContactSubCategories",
+                name: "ContactSubcategories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -73,9 +74,9 @@ namespace ASP_NET_Contacts_List.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ContactSubCategories", x => x.Id);
+                    table.PrimaryKey("PK_ContactSubcategories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ContactSubCategories_ContactCategories_SubcategoryForId",
+                        name: "FK_ContactSubcategories_ContactCategories_SubcategoryForId",
                         column: x => x.SubcategoryForId,
                         principalTable: "ContactCategories",
                         principalColumn: "Id",
@@ -92,7 +93,7 @@ namespace ASP_NET_Contacts_List.Migrations
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MainCategoryId = table.Column<int>(type: "int", nullable: true),
-                    SubCategoryId = table.Column<int>(type: "int", nullable: true),
+                    SubcategoryId = table.Column<int>(type: "int", nullable: true),
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -117,9 +118,9 @@ namespace ASP_NET_Contacts_List.Migrations
                         principalTable: "ContactCategories",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_AspNetUsers_ContactSubCategories_SubCategoryId",
-                        column: x => x.SubCategoryId,
-                        principalTable: "ContactSubCategories",
+                        name: "FK_AspNetUsers_ContactSubcategories_SubcategoryId",
+                        column: x => x.SubcategoryId,
+                        principalTable: "ContactSubcategories",
                         principalColumn: "Id");
                 });
 
@@ -210,16 +211,16 @@ namespace ASP_NET_Contacts_List.Migrations
 
             migrationBuilder.InsertData(
                 table: "ContactCategories",
-                columns: new[] { "Id", "Name" },
+                columns: new[] { "Id", "Name", "WildcardCategory" },
                 values: new object[,]
                 {
-                    { 1, "Work" },
-                    { 2, "Private" },
-                    { 3, "Other" }
+                    { 1, "Work", false },
+                    { 2, "Private", false },
+                    { 3, "Other", true }
                 });
 
             migrationBuilder.InsertData(
-                table: "ContactSubCategories",
+                table: "ContactSubcategories",
                 columns: new[] { "Id", "Name", "SubcategoryForId" },
                 values: new object[,]
                 {
@@ -230,11 +231,12 @@ namespace ASP_NET_Contacts_List.Migrations
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "DateOfBirth", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "MainCategoryId", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "SubCategoryId", "Surname", "TwoFactorEnabled", "UserName" },
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "DateOfBirth", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "MainCategoryId", "Name", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "SubcategoryId", "Surname", "TwoFactorEnabled", "UserName" },
                 values: new object[,]
                 {
-                    { 1, 0, "concurrency_stamp1", new DateTime(1980, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "john.doe@example.com", false, false, null, 1, "John", "", null, "AQAAAAIAAYagAAAAEA5uXHRKnZbTQY16R/H308bDrRMX5/hJDvXG1Hl3AYDfsgw98t2FGm/URssS+rFgBw==", "213465743", false, "security_stamp1", 1, "Doe", false, null },
-                    { 2, 0, "concurrency_stamp2", new DateTime(2024, 2, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "admin@admin.com", false, false, null, 1, "Admin", "", null, "AQAAAAIAAYagAAAAEONvYT9Jx0Em5jqrI5okE/+r7L3/bhuS8DqvmekivM+FTGzuhI7/14/lRVm6O77yqw==", "123456789", false, "security_stamp2", 1, "Admin", false, null }
+                    { 1, 0, "concurrency_stamp1", new DateTime(1980, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "john.doe@example.com", false, false, null, 1, "John", "", null, "AQAAAAIAAYagAAAAEHGboQrZ+fAjNmdaWussA0zAHHkhzgS7XS9kBD20xrWs2k/suLiFYm8NkgT6ZrWh2w==", "213465743", false, "security_stamp1", 1, "Doe", false, null },
+                    { 2, 0, "concurrency_stamp2", new DateTime(2024, 2, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "admin@admin.com", false, false, null, 1, "Admin", "", null, "AQAAAAIAAYagAAAAENrF+/EslEOCEennTGW/dN5nX7JC9Y1Q9B4WQ76yb49/vlTmv/TXiUfF25ZNgQ63dQ==", "123456789", false, "security_stamp2", 1, "Admin", false, null },
+                    { 3, 0, "concurrency_stamp2", new DateTime(2024, 2, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "a", false, false, null, 1, "a", "", null, "AQAAAAIAAYagAAAAEIu0yCS7zId0P+tu3KRqub/R1htgWiX5Qbyth1CLrbe/ghTT/QE2KJlyvWgo2i4DrA==", "123", false, "security_stamp2", 1, "a", false, null }
                 });
 
             migrationBuilder.CreateIndex(
@@ -275,9 +277,9 @@ namespace ASP_NET_Contacts_List.Migrations
                 column: "MainCategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_SubCategoryId",
+                name: "IX_AspNetUsers_SubcategoryId",
                 table: "AspNetUsers",
-                column: "SubCategoryId");
+                column: "SubcategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -287,8 +289,8 @@ namespace ASP_NET_Contacts_List.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ContactSubCategories_SubcategoryForId",
-                table: "ContactSubCategories",
+                name: "IX_ContactSubcategories_SubcategoryForId",
+                table: "ContactSubcategories",
                 column: "SubcategoryForId");
         }
 
@@ -317,7 +319,7 @@ namespace ASP_NET_Contacts_List.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "ContactSubCategories");
+                name: "ContactSubcategories");
 
             migrationBuilder.DropTable(
                 name: "ContactCategories");

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASP_NET_Contacts_List.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240609115930_First")]
-    partial class First
+    [Migration("20240610083254_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -84,7 +84,7 @@ namespace ASP_NET_Contacts_List.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("SubCategoryId")
+                    b.Property<int?>("SubcategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Surname")
@@ -110,7 +110,7 @@ namespace ASP_NET_Contacts_List.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("SubCategoryId");
+                    b.HasIndex("SubcategoryId");
 
                     b.ToTable("AspNetUsers", (string)null);
 
@@ -127,11 +127,11 @@ namespace ASP_NET_Contacts_List.Migrations
                             MainCategoryId = 1,
                             Name = "John",
                             NormalizedEmail = "",
-                            PasswordHash = "AQAAAAIAAYagAAAAEA5uXHRKnZbTQY16R/H308bDrRMX5/hJDvXG1Hl3AYDfsgw98t2FGm/URssS+rFgBw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHGboQrZ+fAjNmdaWussA0zAHHkhzgS7XS9kBD20xrWs2k/suLiFYm8NkgT6ZrWh2w==",
                             PhoneNumber = "213465743",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "security_stamp1",
-                            SubCategoryId = 1,
+                            SubcategoryId = 1,
                             Surname = "Doe",
                             TwoFactorEnabled = false
                         },
@@ -147,12 +147,32 @@ namespace ASP_NET_Contacts_List.Migrations
                             MainCategoryId = 1,
                             Name = "Admin",
                             NormalizedEmail = "",
-                            PasswordHash = "AQAAAAIAAYagAAAAEONvYT9Jx0Em5jqrI5okE/+r7L3/bhuS8DqvmekivM+FTGzuhI7/14/lRVm6O77yqw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAENrF+/EslEOCEennTGW/dN5nX7JC9Y1Q9B4WQ76yb49/vlTmv/TXiUfF25ZNgQ63dQ==",
                             PhoneNumber = "123456789",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "security_stamp2",
-                            SubCategoryId = 1,
+                            SubcategoryId = 1,
                             Surname = "Admin",
+                            TwoFactorEnabled = false
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "concurrency_stamp2",
+                            DateOfBirth = new DateTime(2024, 2, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "a",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            MainCategoryId = 1,
+                            Name = "a",
+                            NormalizedEmail = "",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIu0yCS7zId0P+tu3KRqub/R1htgWiX5Qbyth1CLrbe/ghTT/QE2KJlyvWgo2i4DrA==",
+                            PhoneNumber = "123",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "security_stamp2",
+                            SubcategoryId = 1,
+                            Surname = "a",
                             TwoFactorEnabled = false
                         });
                 });
@@ -169,6 +189,9 @@ namespace ASP_NET_Contacts_List.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("WildcardCategory")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.ToTable("ContactCategories");
@@ -177,21 +200,24 @@ namespace ASP_NET_Contacts_List.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Work"
+                            Name = "Work",
+                            WildcardCategory = false
                         },
                         new
                         {
                             Id = 2,
-                            Name = "Private"
+                            Name = "Private",
+                            WildcardCategory = false
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Other"
+                            Name = "Other",
+                            WildcardCategory = true
                         });
                 });
 
-            modelBuilder.Entity("ASP_NET_Contacts_List.Models.ContactSubCategory", b =>
+            modelBuilder.Entity("ASP_NET_Contacts_List.Models.ContactSubcategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -210,7 +236,7 @@ namespace ASP_NET_Contacts_List.Migrations
 
                     b.HasIndex("SubcategoryForId");
 
-                    b.ToTable("ContactSubCategories");
+                    b.ToTable("ContactSubcategories");
 
                     b.HasData(
                         new
@@ -372,19 +398,19 @@ namespace ASP_NET_Contacts_List.Migrations
                         .WithMany("ContactsWithCategory")
                         .HasForeignKey("MainCategoryId");
 
-                    b.HasOne("ASP_NET_Contacts_List.Models.ContactSubCategory", "SubCategory")
+                    b.HasOne("ASP_NET_Contacts_List.Models.ContactSubcategory", "Subcategory")
                         .WithMany("ContactsWithSubcategory")
-                        .HasForeignKey("SubCategoryId");
+                        .HasForeignKey("SubcategoryId");
 
                     b.Navigation("MainCategory");
 
-                    b.Navigation("SubCategory");
+                    b.Navigation("Subcategory");
                 });
 
-            modelBuilder.Entity("ASP_NET_Contacts_List.Models.ContactSubCategory", b =>
+            modelBuilder.Entity("ASP_NET_Contacts_List.Models.ContactSubcategory", b =>
                 {
                     b.HasOne("ASP_NET_Contacts_List.Models.ContactCategory", "SubcategoryFor")
-                        .WithMany("SubCategories")
+                        .WithMany("Subcategories")
                         .HasForeignKey("SubcategoryForId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -447,10 +473,10 @@ namespace ASP_NET_Contacts_List.Migrations
                 {
                     b.Navigation("ContactsWithCategory");
 
-                    b.Navigation("SubCategories");
+                    b.Navigation("Subcategories");
                 });
 
-            modelBuilder.Entity("ASP_NET_Contacts_List.Models.ContactSubCategory", b =>
+            modelBuilder.Entity("ASP_NET_Contacts_List.Models.ContactSubcategory", b =>
                 {
                     b.Navigation("ContactsWithSubcategory");
                 });

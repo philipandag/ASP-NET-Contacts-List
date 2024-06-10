@@ -7,13 +7,14 @@ namespace ASP_NET_Contacts_List.Controllers
 {
     public class HomeController : Controller
     {
-        [Route("index.html")]
-        public IActionResult Index()
+        private readonly ILogger<HomeController> _logger;
+
+        public HomeController(ILogger<HomeController> logger)
         {
-            return View();
+            _logger = logger;
         }
 
-        public IActionResult Privacy()
+        public IActionResult Index()
         {
             return View();
         }

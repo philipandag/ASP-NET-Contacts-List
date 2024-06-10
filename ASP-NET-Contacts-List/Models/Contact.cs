@@ -11,14 +11,9 @@ namespace ASP_NET_Contacts_List.Models
 
         public override string PasswordHash { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
-
-        [AllowNull]
         public ContactCategory? MainCategory { get; set; }
+        public ContactSubcategory? Subcategory { get; set; }
 
-        [AllowNull]
-        public ContactSubCategory? SubCategory { get; set; }
-
-        [AllowNull]
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
     }

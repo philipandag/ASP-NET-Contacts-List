@@ -10,7 +10,9 @@ namespace ASP_NET_Contacts_List.Models
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
 
-        public IEnumerable<ContactSubCategory> SubCategories { get; set; }
+        public bool WildcardCategory { get; set; } = false;
+
+        public IEnumerable<ContactSubcategory> Subcategories { get; set; }
         public IEnumerable<Contact> ContactsWithCategory { get; set; }
     }
 }
